@@ -13,6 +13,7 @@ from src.models.nn import DropoutNd
 _c2r = torch.view_as_real
 _r2c = torch.view_as_complex
 
+
 class S4DKernel(nn.Module):
     """Wrapper around SSKernelDiag that generates the diagonal SSM parameters
     """
@@ -40,13 +41,13 @@ class S4DKernel(nn.Module):
         """
 
         # Materialize parameters
-        dt = torch.exp(self.log_dt) # (H)
-        C = _r2c(self.C) # (H N)
-        A = -torch.exp(self.log_A_real) + 1j * self.A_imag # (H N)
+        dt = torch.exp(self.log_dt)  # (H)
+        C = _r2c(self.C)  # (H N)
+        A = -torch.exp(self.log_A_real) + 1j * self.A_imag  # (H N)
 
         # Vandermonde multiplication
         dtA = A * dt.unsqueeze(-1)  # (H N)
-        K = dtA.unsqueeze(-1) * torch.arange(L, device=A.device) # (H N L)
+        K = dtA.unsqueeze(-1) * torch.arange(L, device=A.device)  # (H N L)
         C = C * (torch.exp(dtA)-1.) / A
         K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K)).real
 
@@ -61,7 +62,8 @@ class S4DKernel(nn.Module):
             self.register_parameter(name, nn.Parameter(tensor))
 
             optim = {"weight_decay": 0.0}
-            if lr is not None: optim["lr"] = lr
+            if lr is not None:
+                optim["lr"] = lr
             setattr(getattr(self, name), "_optim", optim)
 
 
@@ -92,23 +94,25 @@ class S4D(nn.Module):
             nn.GLU(dim=-2),
         )
 
-    def forward(self, u, **kwargs): # absorbs return_output and transformer src mask
+    def forward(self, u, **kwargs):  # absorbs return_output and transformer src mask
         """ Input and output shape (B, H, L) """
-        if not self.transposed: u = u.transpose(-1, -2)
+        if not self.transposed:
+            u = u.transpose(-1, -2)
         L = u.size(-1)
 
         # Compute SSM Kernel
-        k = self.kernel(L=L) # (H L)
+        k = self.kernel(L=L)  # (H L)
 
         # Convolution
-        k_f = torch.fft.rfft(k, n=2*L) # (H L)
-        u_f = torch.fft.rfft(u, n=2*L) # (B H L)
-        y = torch.fft.irfft(u_f*k_f, n=2*L)[..., :L] # (B H L)
+        k_f = torch.fft.rfft(k, n=2*L)  # (H L)
+        u_f = torch.fft.rfft(u, n=2*L)  # (B H L)
+        y = torch.fft.irfft(u_f*k_f, n=2*L)[..., :L]  # (B H L)
 
         # Compute D term in state space equation - essentially a skip connection
         y = y + u * self.D.unsqueeze(-1)
 
         y = self.dropout(self.activation(y))
         y = self.output_linear(y)
-        if not self.transposed: y = y.transpose(-1, -2)
-        return y, None # Return a dummy state to satisfy this repo's interface, but this can be modified
+        if not self.transposed:
+            y = y.transpose(-1, -2)
+        return y, None  # Return a dummy state to satisfy this repo's interface, but this can be modified

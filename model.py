@@ -24,17 +24,31 @@ class MySashimi(nn.Module):
 
         super().__init__()
 
+        l_rate = model_params['lr']
         d_input = model_params['d_input']
         d_output = model_params['d_output']
+        n_layers = model_params['n_layers']
+        d_model = model_params['d_model']
+        dropout = model_params['dropout']
         prenorm = model_params['prenorm']
 
+        # Sashimi
+        #input: (batch, length, d_input)
+        #output: (batch, length, d_output)
+
         # Linear encoder (d_input = 1 for grayscale and 3 for RGB)
-        self.encoder = nn.Linear(d_input, d_model)
+        #self.encoder = nn.Linear(d_input, d_model)
 
-        Sashimi()
+        Sashimi(d_model, dropout=dropout,
+                transposed=true, lr=min(0.001, l_rate))
 
-        # Linear decoder
-        self.decoder = nn.Linear(d_model, d_output)
+        #self.decoder = nn.Linear(d_model, d_output)
+
+        def forward(self, x, dummy_lens):
+            print('sashimi works!', self.model)
+            # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
+
+            # logits = self.decoder(x)  # (B, d_model) -> (B, L, d_output)
 
 
 class MyS4(nn.Module):
@@ -50,8 +64,6 @@ class MyS4(nn.Module):
         dropout = model_params['dropout']
         prenorm = model_params['prenorm']
 
-        #self.model = S4D()
-
         self.prenorm = prenorm
 
         # Linear encoder (d_input = 1 for grayscale and 3 for RGB)
@@ -60,7 +72,6 @@ class MyS4(nn.Module):
         # Stack S4 layers as residual blocks
         self.s4_layers = nn.ModuleList()
         self.norms = nn.ModuleList()
-        self.dropouts = nn.ModuleList()
         for _ in range(n_layers):
             self.s4_layers.append(
                 S4D(d_model, dropout=dropout,

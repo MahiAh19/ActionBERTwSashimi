@@ -605,7 +605,9 @@ def init_model_configs(model_name, args, input_dim, max_video_len):
         config = {'model_name': model_name,
                   'max_video_len': max_video_len,
                   'd_input': input_dim,
+                  'd_model': 256,
                   'd_output': args.num_cls,
+                  'n_layers': args.num_layers,
                   'prenorm': True}
         Model = MySashimi
 
