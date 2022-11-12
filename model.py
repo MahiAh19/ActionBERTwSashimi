@@ -42,13 +42,21 @@ class MySashimi(nn.Module):
         Sashimi(d_model, dropout=dropout,
                 transposed=true, lr=min(0.001, l_rate))
 
-        #self.decoder = nn.Linear(d_model, d_output)
+        self.decoder = nn.Linear(d_model, d_output)
 
         def forward(self, x, dummy_lens):
             print('sashimi works!', self.model)
             # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
 
-            # logits = self.decoder(x)  # (B, d_model) -> (B, L, d_output)
+            # Pooling: average pooling over the sequence length
+            x = x.mean(dim=1)
+
+            # Decode the outputs
+            logits = self.decoder(x)  # (B, d_model) -> (B, d_output)
+
+            print(logits.shape)
+
+            return logits
 
 
 class MyS4(nn.Module):
