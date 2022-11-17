@@ -40,7 +40,7 @@ class MySashimi(nn.Module):
         #self.encoder = nn.Linear(d_input, d_model)
 
         Sashimi(d_model, dropout=dropout,
-                transposed=true, lr=min(0.001, l_rate))
+                transposed=True, lr=min(0.001, l_rate))
 
         self.decoder = nn.Linear(d_model, d_output)
 

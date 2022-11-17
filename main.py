@@ -47,7 +47,7 @@ def main():
 
     # Model params
     parser.add_argument('--model',          type=str,       help='RNN , Transformer or S4',
-                        required=True, choices=['bilstm', 'bert', 'mys4'])
+                        required=True, choices=['bilstm', 'bert', 'mys4', 'mySashimi'])
     parser.add_argument('--config_name',    type=str,
                         help='transformers pre-trained config name', default='bert-base-uncased')
     parser.add_argument('--use_pretrained', type=str2bool,
@@ -603,11 +603,13 @@ def init_model_configs(model_name, args, input_dim, max_video_len):
     """
     if model_name == 'mySashimi':
         config = {'model_name': model_name,
+                  'lr': args.lr,
                   'max_video_len': max_video_len,
                   'd_input': input_dim,
                   'd_model': 256,
                   'd_output': args.num_cls,
                   'n_layers': args.num_layers,
+                  'dropout': 0.2,
                   'prenorm': True}
         Model = MySashimi
 
