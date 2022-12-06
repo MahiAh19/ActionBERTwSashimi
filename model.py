@@ -20,6 +20,7 @@ else:
 
 
 class MySashimi(nn.Module):
+
     def __init__(self, model_params, device=None):
 
         super().__init__()
@@ -32,31 +33,139 @@ class MySashimi(nn.Module):
         dropout = model_params['dropout']
         prenorm = model_params['prenorm']
 
-        # Sashimi
-        #input: (batch, length, d_input)
-        #output: (batch, length, d_output)
+        self.prenorm = prenorm
 
         # Linear encoder (d_input = 1 for grayscale and 3 for RGB)
-        #self.encoder = nn.Linear(d_input, d_model)
+        self.encoder = nn.Linear(d_input, d_model)
 
-        Sashimi(d_model, dropout=dropout,
-                transposed=True, lr=min(0.001, l_rate))
+        # Stack S4 layers as residual blocks
+        # self.s4_layers = nn.ModuleList()
+        # self.norms = nn.ModuleList()
+        # for _ in range(n_layers):
+        #     self.s4_layers.append(
+        #         S4D(d_model, dropout=dropout,
+        #             transposed=True, lr=min(0.001, l_rate))
+        #     )
+        #     self.norms.append(nn.LayerNorm(d_model))
+        #     self.dropouts.append(dropout_fn(dropout))
 
+        self.sashimi = Sashimi(d_model=d_input, pool=[2])
+
+        # Linear decoder
         self.decoder = nn.Linear(d_model, d_output)
 
-        def forward(self, x, dummy_lens):
-            print('sashimi works!', self.model)
-            # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
+        # self.fc = nn.Sequential(nn.Linear(hidden_dim, fc_dim),
+        #                         nn.Dropout(0.5),
+        #                         nn.Tanh(),
+        #                         nn.Linear(fc_dim, num_cls))
 
-            # Pooling: average pooling over the sequence length
-            x = x.mean(dim=1)
+    def forward(self, x, dummy_lens):
+        #print('s4 works!', self.model)
 
-            # Decode the outputs
-            logits = self.decoder(x)  # (B, d_model) -> (B, d_output)
+        print(x.shape)
+        # print(x.dtype)
 
-            print(logits.shape)
+        # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
 
-            return logits
+        # # print(x.shape)
+        # # print(x.dtype)
+
+        # x = x.transpose(-1, -2)  # (B, L, d_model) -> (B, d_model, L)
+        # # print(x.shape)
+        # # print(x.dtype)
+
+        # for layer, norm, dropout in zip(self.s4_layers, self.norms, self.dropouts):
+        #     # Each iteration of this loop will map (B, d_model, L) -> (B, d_model, L)
+
+        #     z = x
+        #     if self.prenorm:
+        #         # Prenorm
+        #         z = norm(z.transpose(-1, -2)).transpose(-1, -2)
+
+        #     # Apply S4 block: we ignore the state input and output
+        #     z, _ = layer(z)
+
+        #     # Dropout on the output of the S4 block
+        #     z = dropout(z)
+
+        #     # Residual connection
+        #     x = z + x
+
+        #     if not self.prenorm:
+        #         # Postnorm
+        #         x = norm(x.transpose(-1, -2)).transpose(-1, -2)
+
+        # x = x.transpose(-1, -2)
+
+        # # Pooling: average pooling over the sequence length
+        # x = x.mean(dim=1)
+
+        # # Decode the outputs
+        # logits = self.decoder(x)  # (B, d_model) -> (B, d_output)
+
+        # print(logits.shape)
+        # x = torch.randn(13, 128, 32).cuda() #x_input: [batch_size, seq_len, input_dim] seq_len power of 2
+        print(x.shape)
+        out, _ = self.sashimi(x)
+        out = out.mean(dim=1)
+        print(out.shape)
+        return out
+
+    # def __init__(self, model_params, device=None):
+
+    #     super().__init__()
+
+    #     # l_rate = model_params['lr']
+    #     # d_input = model_params['d_input']
+    #     # d_output = model_params['d_output']
+    #     # n_layers = model_params['n_layers']
+    #     d_model = model_params['d_model']
+    #     # dropout = model_params['dropout']
+    #     # prenorm = model_params['prenorm']
+
+    #     # Sashimi
+    #     #input: (batch, length, d_input)
+    #     #output: (batch, length, d_output)
+
+    #     # Linear encoder (d_input = 1 for grayscale and 3 for RGB)
+    #     #self.encoder = nn.Linear(d_input, d_model)
+
+    #     # Sashimi(d_model, dropout=dropout,
+    #     #         transposed=True, lr=min(0.001, l_rate))
+
+    #     self.sashimi = Sashimi(d_model=d_model)
+
+    #     # self.decoder = nn.Linear(d_model, d_output)
+
+    #     def forward(self, x, dummy_lens):
+    #         print('sashimi works!', self.model)
+    #         # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
+
+    #         # # Pooling: average pooling over the sequence length
+    #         # x = x.mean(dim=1)
+
+    #         # # Decode the outputs
+    #         # logits = self.decoder(x)  # (B, d_model) -> (B, d_output)
+
+    #         # print(logits.shape)
+    #         out, _ = self.sashimi(x)
+    #         print(out.shape)
+    #         return out
+
+      # def forward2(self, x, dummy_lens):
+      #     print('sashimi works!', self.model)
+      #     # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
+
+      #     # # Pooling: average pooling over the sequence length
+      #     # x = x.mean(dim=1)
+
+      #     # # Decode the outputs
+      #     # logits = self.decoder(x)  # (B, d_model) -> (B, d_output)
+
+      #     # print(logits.shape)
+      #     out, _ = self.sashimi(x)
+      #     print(out.shape)
+      #     return out
 
 
 class MyS4(nn.Module):
@@ -80,6 +189,8 @@ class MyS4(nn.Module):
         # Stack S4 layers as residual blocks
         self.s4_layers = nn.ModuleList()
         self.norms = nn.ModuleList()
+        self.dropouts = nn.ModuleList()
+
         for _ in range(n_layers):
             self.s4_layers.append(
                 S4D(d_model, dropout=dropout,

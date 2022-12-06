@@ -13,7 +13,7 @@ from utils import compute_validation_test_metrics
 
 
 from model import BiLSTM, Transformer, MyS4, MySashimi
-print(MySashimi)
+# print(MySashimi)
 
 """
 Train + Val:
@@ -402,6 +402,9 @@ def main():
         model = Model(model_configs, device)
         model.to(device)
 
+        print(Model)
+        print(model.forward)
+
         # Loss & Optimizer
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr)
@@ -443,6 +446,9 @@ def main():
                 inputs, label = batch_data[:-1], batch_data[-1]
 
                 # Forward Pass
+                # print(inputs.shape)
+                # label_logits = model(*inputs)
+                # print(model)
                 label_logits = model(*inputs)
 
                 # Compute Loss
@@ -606,11 +612,11 @@ def init_model_configs(model_name, args, input_dim, max_video_len):
                   'lr': args.lr,
                   'max_video_len': max_video_len,
                   'd_input': input_dim,
-                  'd_model': 256,
+                  'd_model': 128,
                   'd_output': args.num_cls,
                   'n_layers': args.num_layers,
                   'dropout': 0.2,
-                  'prenorm': True}
+                  'prenorm': False}
         Model = MySashimi
 
     elif model_name == 'mys4':
