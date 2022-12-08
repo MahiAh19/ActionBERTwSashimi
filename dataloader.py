@@ -59,15 +59,30 @@ class ConvEmbeddingDataset(Dataset):
         return json_data
 
 
+def highestPowerof2(n):
+    res = 0
+    for i in range(n, 0, -1):
+        if ((i & (i - 1)) == 0):
+            res = i
+            break
+    return res
+
+
 class BiLSTMDataset(ConvEmbeddingDataset):
 
-    def __init__(self, json_file, embedding_file, max_video_len=None):
+    def __init__(self, json_file, embedding_file, max_video_len=None, truncate_to_power_of_two=True):
         super().__init__(json_file, embedding_file, max_video_len)
+        self.truncate = truncate_to_power_of_two
 
     def __getitem__(self, idx):
         embedding = torch.tensor(self.embeddings[idx])
         video_len = self.video_lengths[idx]
         label = self.labels[idx]
+
+        if self.truncate:
+            truncated_length = highestPowerof2(video_len)
+            embedding = embedding[:, :truncated_length, :]
+            video_len = truncated_length
 
         return embedding, video_len, label
 
@@ -136,11 +151,12 @@ class TransformerDataset(ConvEmbeddingDataset):
 
 
 if __name__ == '__main__':
-    jsn = '/content/ActionBERT/testFrame/data_res18_fps_1/train.json'
-    npy = '/content/ActionBERT/testFrame/data_res18_fps_1/train.npy'
+    jsn = '/home/axe/Datasets/UCF_101/processed_fps_1_res18/train_fps_1_res18.json'
+    npy = '/home/axe/Datasets/UCF_101/processed_fps_1_res18/train_fps_1_res18.npy'
 
-    dataset = BiLSTMDataset(jsn, npy)
-    #dataset = TransformerDataset(jsn, npy, model_name='bert', tok_config='bert-base-uncased')
+    # dataset = BiLSTMDataset(jsn, npy)
+    dataset = TransformerDataset(
+        jsn, npy, model_name='bert', tok_config='bert-base-uncased')
     print(dataset.__len__())
 
     dataloader = DataLoader(dataset, batch_size=2)
