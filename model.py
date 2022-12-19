@@ -62,7 +62,7 @@ class MySashimi(nn.Module):
     def forward(self, x, dummy_lens):
         #print('s4 works!', self.model)
 
-        print(x.shape)
+        # print(x.shape)
         # print(x.dtype)
 
         # x = self.encoder(x)  # (B, L, d_input) -> (B, L, d_model)
@@ -105,10 +105,10 @@ class MySashimi(nn.Module):
 
         # print(logits.shape)
         # x = torch.randn(13, 128, 32).cuda() #x_input: [batch_size, seq_len, input_dim] seq_len power of 2
-        print(x.shape)
+        # print(x.shape)
         out, _ = self.sashimi(x)
         out = out.mean(dim=1)
-        print(out.shape)
+        # print(out.shape)
         return out
 
     # def __init__(self, model_params, device=None):

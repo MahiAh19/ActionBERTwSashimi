@@ -111,7 +111,7 @@ def main():
         # Set the project where this run will be logged
         project="S4_ActionBERT",
         # We pass a run name (otherwise it’ll be randomly assigned, like sunshine-lollypop-10)
-        name=f"experiment_BERT",
+        name=f"exp_Sashimi",
         entity="499_ratpack",
         # Track hyperparameters and run metadata
         config={
@@ -402,8 +402,8 @@ def main():
         model = Model(model_configs, device)
         model.to(device)
 
-        print(Model)
-        print(model.forward)
+        # print(Model)
+        # print(model.forward)
 
         # Loss & Optimizer
         criterion = nn.CrossEntropyLoss()

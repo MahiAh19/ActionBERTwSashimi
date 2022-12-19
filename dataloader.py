@@ -80,9 +80,14 @@ class BiLSTMDataset(ConvEmbeddingDataset):
         label = self.labels[idx]
 
         if self.truncate:
-            truncated_length = highestPowerof2(video_len)
-            embedding = embedding[:, :truncated_length, :]
+            truncated_length = 64
+            embedding = embedding[:truncated_length, :]
             video_len = truncated_length
+
+#         if self.truncate:
+#           truncated_length = 64 #highestPowerof2(video_len)
+#           embedding = embedding[:truncated_length,:]
+#           video_len = truncated_length
 
         return embedding, video_len, label
 
