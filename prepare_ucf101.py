@@ -144,7 +144,7 @@ if __name__ == '__main__':
     classes = [cls.split('/')[-1] for cls in classes]
 
     assert len(
-        classes) == 101, 'The UCF-101 dataset expects total 101 classes, but {} found!'.format(len(classes))
+        classes) == 152, 'The UCF-101 dataset expects total 152 classes, but {} found!'.format(len(classes))
 
     # For each class in the videos dir, perform train-val split
     class2idx = {cls: i for i, cls in enumerate(classes)}
